@@ -2,7 +2,7 @@ pandas
 matplotlib # For graph ploting
 plotly # For graph ploting
 seaborn # For graph ploting
-yaml  #For reading yaml files
+pyyaml  #For reading yaml files
 ensure # Ensuring correct return type
 python-box  # working with yaml files
 streamlit   # For site rendering
