@@ -1,79 +1,164 @@
-import time
 import streamlit as st
-from main import Consumer
-st.markdown(
-            """
-    <style>
-    body {
-        background-color: black; /* Set background color of entire body */
-    }
-    .stApp {
-        background: linear-gradient(to right, #9ca1b9, #9ad1e7, #f7cece); /* Set background color of main content area */
-    }
+from main import ConsumerDisputeInsight
 
-    </style>
-    """,
+st.set_page_config(layout="wide", page_title="Consumer Dispute Insights", page_icon=":fontawesome:📄")
+st.markdown(
+    """
+        <style>
+            body {
+                background-color: black; /* background color */
+                }
+            .stApp {
+                background: linear-gradient(to right, #9ca1b9, #9ad1e7, #f7cece);
+                }
+            .footer {
+                text-align: center;
+                font-size: 15px;
+                padding-top: 20px;
+                    }
+        </style>
+    """+
+    """
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" 
+            rel="stylesheet" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">""",
     unsafe_allow_html=True
             )
+
 
 class Configuration:
     def __init__(self, consumer):
         self.consumer = consumer
-        st.sidebar.image("Consumer_image_title.jpg")
-        
+        st.sidebar.image("Consumer_image_title.jpg") # SHOWS IMAGE TO THE SIDEBAR OF APPLICATION.
+        st.title("Consumer Dispute Analysis") # SIDEBAR TITLE
+       
     def sidebar_year_list(self):
-        value = self.consumer.year_list_for_sidebar()
-        selected_year = st.sidebar.selectbox("Year_Selection", value)
-        return selected_year
+        """
+        To display a sidebar selectbox for selecting a year..
 
-    def show_basic_analysis(self, submitted_year):
+        Parameters:
+            self: The instance of the Configuration class.
+
+        Returns:
+            selected_year (str): The selected year from the sidebar selectbox.
+        """
+        value = self.consumer.get_year_list_for_sidebar()
+        selected_year = st.sidebar.selectbox("Select Year to View", value)
+        return selected_year
+    
+    def show_basic_analysis(self, submitted_year)-> None: 
+        """
+        Shows basic insight of data..
+
+        Parameters:
+            self: The instance of the Configuration class.
+            _submitted_year: The selected year from the sidebar selectbox.
+        
+        Requires:
+            Object:  Access to Consumer objects to call shows_basic_analasis_function to preproces the data and return for rendering.
+
+        Returns:
+            None
+        """
         result= self.consumer.show_basic_analysis_fun(submitted_year, self.submitted_by_left_panel)
         
         if self.submitted_by_left_panel == "Overall" and submitted_year == "Overall":
-            Overall_data,top_issue,company_response,total_dispute=result
+            Overall_data,top_issue,company_response=result
             st.header("Overall Analysis")
             st.dataframe(Overall_data)
             left_column, right_column = st.columns(2)
-            with left_column:
-                st.write(f"**Top Issues list faced by Consumer**")
-                st.write(top_issue)
-            with right_column:  
-                st.write(f"**Top Company Response to Consumer**")
-                st.write(company_response)
+            with left_column:    # LEFT SIDE GRAPH
+                st.write(f"**Top Issues Faced by Consumer**",top_issue)
+               
+            with right_column:  # RIGHT SIDE GRAPH
+                st.write(f"**Top Company Response to Consumer**",company_response)
 
-            st.write(f"**Consumer Disputed**")
-            st.write(total_dispute)
         else:
-            st.header("Top 10 Rows of DATA:")
+            st.header("Top Insight of Data:") # WHOLE DATA
             st.dataframe(result)
 
+    def figures_analsis(self,current_selected_year):
+        """
+        Responsible for returning the analytics figure
 
-    def figures_analsis(self,submitted_year):
-        st.header(str(submitted_year)+' Product List')
-        figure_pie,figure_count,figure_bar = self.consumer.figure(current_selected_year)
-        st.plotly_chart(figure_pie)
-        st.header(str(submitted_year )+" Anaylsis of Product & Submitted ")
+        parameter:
+            self: The instance of the Configuration class.
+            current_selected_year: str
+        
+        Requires: streamlit library instance
+
+        Returns: None
+        """
+        product_pie_chart,response_to_consumer_pie_chart,figure_count,figure_bar_plotly,dispute_resolved_bar_plotly = self.consumer.show_figures(current_selected_year)
+
+        left_column, right_column = st.columns(2)
+        with left_column:           
+            st.header(str(current_selected_year ) +" Products")
+            st.plotly_chart(product_pie_chart)
+            
+        with right_column:  
+            
+            st.header(str(current_selected_year ) +" Response to Consumer")
+            st.plotly_chart(response_to_consumer_pie_chart)
+        # SEABORN BAR GRPAH
+        st.header(str(current_selected_year )+" Anaylsis of Product & Submitted ")
         st.pyplot(figure_count)
-        st.plotly_chart(figure_bar)
+
+        left_column, right_column = st.columns(2)
+        with left_column:           
+            st.header(str(current_selected_year ) +" Total Disputes Submitted over Products")
+            st.plotly_chart(figure_bar_plotly)
+            
+        with right_column:  
+            
+            st.header(str(current_selected_year ) +" Total Disputes over Products")
+            st.plotly_chart(dispute_resolved_bar_plotly)
 
 
-    def print_time(self,start_time,end_time):
-        start_time
-        st.write(f"Time taken to render: {end_time - start_time} seconds")
+class SoicalFooterUI:
+    def footer(self):
+        """
+        Function to display footer with social media links.
+
+        Returns:
+            None
+        """
+        social_media_links = {
+            "GitHub": "https://github.com/Shivam-Shane",
+            "Medium": "https://medium.com/@sk0551460",
+            "LinkedIn": "https://www.linkedin.com/in/shivam-2641081a0/",
+            "Portfolio": "https://shivam-shane.github.io/My_portfolio_website/"
+        }
+
+        icon_urls = {
+        "GitHub": "fab fa-github",
+        "Medium": "fab fa-medium",
+        "LinkedIn": "fab fa-linkedin-in",
+        "Portfolio": "far fa-envelope-open"
+        }
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.write("Thank you for visiting Consumer Dispute Insights!")
+            st.write("Stay connected with us on social media.")
+            for platform, url in social_media_links.items():
+                icon_url = icon_urls[platform]
+                st.markdown(f'<a href="{url}"><i class="{icon_url}" style="font-size: 30px;"></i> {platform}</a>'
+                            , unsafe_allow_html=True)
 
 if __name__ == '__main__':
-    start_time = time.time()
-    consumer = Consumer()
-    Configuration_object = Configuration(consumer)
-
-    Configuration_object.submitted_by_left_panel = st.sidebar.radio(
-        'Submitted By',
+    # Instantiate objects
+    consumer = ConsumerDisputeInsight()
+    configuration = Configuration(consumer)
+    soicalfooterui=SoicalFooterUI()
+    # Sidebar options
+    configuration.submitted_by_left_panel = st.sidebar.radio(
+        'Select Submission Type',
         ('Overall', 'Web', 'Referral', 'Phone', 'Postal mail', 'Fax', 'Email')
     )
-
-    current_selected_year = Configuration_object.sidebar_year_list()
-    Configuration_object.show_basic_analysis(current_selected_year)
-    Configuration_object.figures_analsis(current_selected_year)
-    end_time = time.time()
-    Configuration_object.print_time(start_time,end_time)
-    
+    # Sidebar year selection
+    current_selected_year = configuration.sidebar_year_list()
+    configuration.show_basic_analysis(current_selected_year)
+    configuration.figures_analsis(current_selected_year)
+    soicalfooterui.footer()
