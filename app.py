@@ -12,10 +12,16 @@ st.markdown(
                 background: linear-gradient(to right, #9ca1b9, #9ad1e7, #f7cece);
                 }
             .footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background-color: #333;
+                color: white;
                 text-align: center;
                 font-size: 15px;
-                padding-top: 20px;
-                    }
+                padding: 10px 0;
+            }
         </style>
     """+
     """
@@ -94,25 +100,25 @@ class Configuration:
         left_column, right_column = st.columns(2)
         with left_column:           
             st.header(str(current_selected_year ) +" Products")
-            st.plotly_chart(product_pie_chart)
+            st.plotly_chart(product_pie_chart,use_container_width=True)
             
         with right_column:  
             
             st.header(str(current_selected_year ) +" Response to Consumer")
-            st.plotly_chart(response_to_consumer_pie_chart)
+            st.plotly_chart(response_to_consumer_pie_chart,use_container_width=True)
         # SEABORN BAR GRPAH
         st.header(str(current_selected_year )+" Anaylsis of Product & Submitted ")
         st.pyplot(figure_count)
 
         left_column, right_column = st.columns(2)
         with left_column:           
-            st.header(str(current_selected_year ) +" Total Disputes Submitted over Products")
-            st.plotly_chart(figure_bar_plotly)
+            st.header(str(current_selected_year ) +" Disputes Submitted over Products")
+            st.plotly_chart(figure_bar_plotly,use_container_width=True)
             
         with right_column:  
             
-            st.header(str(current_selected_year ) +" Total Disputes over Products")
-            st.plotly_chart(dispute_resolved_bar_plotly)
+            st.header(str(current_selected_year ) +" Disputes over Products")
+            st.plotly_chart(dispute_resolved_bar_plotly,use_container_width=True)
 
 
 class SoicalFooterUI:
@@ -140,12 +146,20 @@ class SoicalFooterUI:
         col1, col2 = st.columns(2)
 
         with col1:
-            st.write("Thank you for visiting Consumer Dispute Insights!")
-            st.write("Stay connected with us on social media.")
+            st.write("**Stay connected with us on social media.**")
             for platform, url in social_media_links.items():
                 icon_url = icon_urls[platform]
                 st.markdown(f'<a href="{url}"><i class="{icon_url}" style="font-size: 30px;"></i> {platform}</a>'
                             , unsafe_allow_html=True)
+                st.markdown(
+            '<div class="footer"> '
+            '<div>Thank you for visiting Consumer Dispute Insights! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+            '&nbsp;&nbsp;&nbsp;&nbsp; Copyright © 2024 &nbsp;&nbsp;SHIVAM </div>'
+            '</div>',
+            unsafe_allow_html=True
+        )    
+
+
 
 if __name__ == '__main__':
     # Instantiate objects

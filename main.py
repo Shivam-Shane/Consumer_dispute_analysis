@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from constant import CONFIG_FILE_PATH
 from utils import read_yaml
+from ensure import ensure_annotations
 
 
 class ConsumerDisputeInsight:
@@ -12,24 +13,19 @@ class ConsumerDisputeInsight:
         self.data = pd.read_csv(self.config.data_path)
         self.data['Date received'] = pd.to_datetime(self.data['Date received'])
         self.data['year'] = self.data['Date received'].dt.year
+        self.product_count = self.data['Product'].value_counts()
+        self.submitted_via_count = self.data['Submitted via'].value_counts()
 
     def show_basic_analysis_fun(self, submitted_year, submitted_by):
-        
         if submitted_by == "Overall" and submitted_year == "Overall":
-
-            Overall_data={"Unique Product List":len((self.data['Product'].unique())),
-                        "Total Year":len(self.data['year'].unique()),
-                        "Overall Dispute Submittion Mode":len(self.data['Submitted via'].unique()),
-                        "Total Consumer Disputes":len(self.data[self.data['Consumer disputed?']=='Yes']) 
-                          }
-            overall_data=pd.DataFrame(Overall_data,index=[0])
-            
-            top_issues=self.data['Issue'].value_counts().head(5)
-            company_response=self.data['Company response to consumer'].value_counts().head(5)
-           
-            return overall_data,top_issues,company_response
-    
-
+            overall_data = {"Unique Product List": len(self.product_count),
+                            "Total Year": len(self.data['year'].unique()),
+                            "Overall Dispute Submittion Mode": len(self.submitted_via_count),
+                            "Total Consumer Disputes": (self.data['Consumer disputed?'] == 'Yes').sum()}
+            overall_data = pd.DataFrame(overall_data, index=[0])
+            top_issues = self.data['Issue'].value_counts().head(5)
+            company_response = self.data['Company response to consumer'].value_counts().head(5)
+            return overall_data, top_issues, company_response
         elif submitted_by == "Overall":
             return self.data[self.data['year'] == submitted_year].iloc[:10, 1:-1]
         elif submitted_year == "Overall":
@@ -38,9 +34,14 @@ class ConsumerDisputeInsight:
             return self.data[(self.data['Submitted via'] == submitted_by) & (self.data['year'] == submitted_year)].iloc[:10, 1:-1]
 
 
-    def get_year_list_for_sidebar(self):
+ 
+    def get_year_list_for_sidebar(self)->list[str]:
         """
         Responsible for generating the year list for the application sidebar
+
+        parameter: 
+            None:
+        return list of year
         """
         data_years = self.data['year'].unique().tolist()
         data_years.sort()
@@ -67,6 +68,10 @@ class ConsumerDisputeInsight:
         product_pie_chart = px.pie(data, values=data['year'], names="Product", color_discrete_sequence=px.colors.sequential.Blugrn)
         # PLOTLY PIE CHART OF PRODUCT COUNT YEAR WISE
         response_to_consumer_pie_chart = px.pie(data, values=data['year'], names="Company response to consumer", color_discrete_sequence=px.colors.sequential.Sunset)
+        response_to_consumer_pie_chart.update_layout(
+            showlegend=False,
+            margin=dict(t=0, b=0, r=0, l=0)
+        )
         # SEABORN BAR CHART OF SUBMITTED VIE AND PRODUCT LIST
         sns.countplot(y=data["Product"], order=data["Product"].value_counts(ascending=True).index,ax=axes[0],palette=palette_color_product)
         sns.countplot(x = data['Submitted via'], data = data,ax=axes[1],palette=palette_color_submitted)
@@ -96,9 +101,8 @@ class ConsumerDisputeInsight:
         Returns: 
             a list of figure to render our application
         """
-        data=self.data #DATA
         if submitted_year == "Overall":
-            return self.generate_figures(data)
+            return self.generate_figures(self.data)
         else:
             data = self.data[self.data['year'] == submitted_year]
             return self.generate_figures(data)
