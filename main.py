@@ -68,10 +68,7 @@ class ConsumerDisputeInsight:
         product_pie_chart = px.pie(data, values=data['year'], names="Product", color_discrete_sequence=px.colors.sequential.Blugrn)
         # PLOTLY PIE CHART OF PRODUCT COUNT YEAR WISE
         response_to_consumer_pie_chart = px.pie(data, values=data['year'], names="Company response to consumer", color_discrete_sequence=px.colors.sequential.Sunset)
-        response_to_consumer_pie_chart.update_layout(
-            showlegend=False,
-            margin=dict(t=0, b=0, r=0, l=0)
-        )
+
         # SEABORN BAR CHART OF SUBMITTED VIE AND PRODUCT LIST
         sns.countplot(y=data["Product"], order=data["Product"].value_counts(ascending=True).index,ax=axes[0],palette=palette_color_product)
         sns.countplot(x = data['Submitted via'], data = data,ax=axes[1],palette=palette_color_submitted)
